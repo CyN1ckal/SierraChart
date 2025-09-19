@@ -4,26 +4,38 @@
 
 SCSFExport scsf_ATRPercentage(SCStudyGraphRef sc)
 {
+	auto& ATRSubgraph = sc.Subgraph[0];
+	auto& ATRPercentSubgraph = sc.Subgraph[1];
+	auto& ATRLengthInput = sc.Input[0];
+	auto& ATRTypeInput = sc.Input[1];
+
 	if (sc.SetDefaults)
 	{
 		sc.GraphName = "ATR Percentage";
 
 		sc.AutoLoop = 1;
 
-		sc.FreeDLL = 1;
+		ATRLengthInput.Name = "ATR Length";
+		ATRLengthInput.SetInt(14);
 
-		sc.Input[0].Name = "Length";
-		sc.Input[0].SetInt(14);
+		ATRTypeInput.Name = "ATR Type";
+		ATRTypeInput.SetMovAvgType(MOVAVGTYPE_SIMPLE);
 
-		sc.Subgraph[0].Name = "ATR";
-		sc.Subgraph[0].DrawStyle = DRAWSTYLE_IGNORE;
+		ATRSubgraph.Name = "ATR";
+		ATRSubgraph.DrawStyle = DRAWSTYLE_IGNORE;
 
-		sc.Subgraph[1].Name = "ATR Percentage";
+		ATRPercentSubgraph.Name = "ATR Percentage";
+		ATRPercentSubgraph.DrawStyle = DRAWSTYLE_LINE;
 	}
 
 	auto Length = sc.Input[0].GetInt();
+	auto MovAvgType = sc.Input[1].GetMovAvgType();
 
-	sc.ATR(sc.BaseData, sc.Subgraph[0], Length, MOVAVGTYPE_SIMPLE);
+	sc.ATR(sc.BaseData, ATRSubgraph, Length, MovAvgType);
 
-	sc.Subgraph[1][sc.Index] = (sc.BaseData[SC_HIGH][sc.Index] - sc.BaseData[SC_LOW][sc.Index]) / sc.Subgraph[0][sc.Index];
+	auto& CurrentBarHigh = sc.BaseData[SC_HIGH][sc.Index];
+	auto& CurrentBarLow = sc.BaseData[SC_LOW][sc.Index];
+	auto CurrentBarRange = CurrentBarHigh - CurrentBarLow;
+
+	ATRPercentSubgraph[sc.Index] = CurrentBarRange / ATRSubgraph[sc.Index];
 }
