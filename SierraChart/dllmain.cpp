@@ -1,7 +1,5 @@
 #include "pch.h"
 
-#include "My Order Types/OrderTypes.h"
-
 SCDLLName("CyNickal Sierra Chart Studies")
 
 #include "ATR Percentage/ATRPercentage.hpp"
