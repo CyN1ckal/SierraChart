@@ -8,3 +8,4 @@ SCDLLName("CyNickal Sierra Chart Studies")
 #include "Trailing Change/TrailingChange.hpp"
 #include "Std Dev Percent/StdDevPercent.hpp"
 #include "RSI Trader/RSI Trader.hpp"
+#include "BB Trader/BBTrader.hpp"
