@@ -45,6 +45,9 @@
     <ClInclude Include="VMABB\VMABB.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="RSI Trend Follow\RSITrendFollow.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

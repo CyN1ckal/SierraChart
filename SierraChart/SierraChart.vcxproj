@@ -146,6 +146,7 @@
     <ClInclude Include="Math\Sum.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RSI Trader\RSI Trader.hpp" />
+    <ClInclude Include="RSI Trend Follow\RSITrendFollow.hpp" />
     <ClInclude Include="Scan Helper\ScanHelper.hpp" />
     <ClInclude Include="Sharpe Ratio\SharpeRatio.hpp" />
     <ClInclude Include="Std Dev Percent\StdDevPercent.hpp" />
