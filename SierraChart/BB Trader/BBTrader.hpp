@@ -1,6 +1,36 @@
 #pragma once
 #include "pch.h"
 
+bool IsValidTradeTime(int Time)
+{
+	/* after 12:55 pm */
+	if (Time > 46500) return false;
+
+	/* before 6:30 am */
+	if (Time < 23400) return false;
+
+	return true;
+}
+
+bool ShouldStopout(float StopAmount, int Time, float CurrentPrice, s_SCPositionData& Position)
+{
+	auto& PositionQuantity = Position.PositionQuantity;
+	float Delta = CurrentPrice - Position.AveragePrice;
+
+	if (PositionQuantity == 0)
+		return false;
+
+	if (!IsValidTradeTime(Time)) return true;
+
+	if (PositionQuantity > 0 && Delta < StopAmount * -1.0f)
+		return true;
+
+	if (PositionQuantity < 0 && Delta > StopAmount)
+		return true;
+
+	return false;
+}
+
 SCSFExport scsf_BBTrader(SCStudyGraphRef sc)
 {
 	auto& HTF_TopBB = sc.Subgraph[0];
@@ -9,11 +39,22 @@ SCSFExport scsf_BBTrader(SCStudyGraphRef sc)
 	auto& LTF_BottomBB = sc.Subgraph[3];
 	auto& RefPrice = sc.Subgraph[4];
 
+	auto& LiveInput = sc.Input[0];
+	auto& StopInput = sc.Input[1];
+
 	if (sc.SetDefaults)
 	{
 		sc.GraphName = "BB Trader";
 
 		sc.AutoLoop = 1;
+
+		sc.AllowMultipleEntriesInSameDirection = false;
+
+		LiveInput.Name = "Send Orders to Trade Service?";
+		LiveInput.SetYesNo(false);
+
+		StopInput.Name = "Stop Amount (P)";
+		StopInput.SetFloat(250.0f);
 
 		HTF_TopBB.Name = "HTF Top BB";
 		HTF_TopBB.DrawStyle = DRAWSTYLE_LINE;
@@ -41,6 +82,8 @@ SCSFExport scsf_BBTrader(SCStudyGraphRef sc)
 		RefPrice.LineWidth = 1;
 	}
 
+	sc.SendOrdersToTradeService = LiveInput.GetYesNo();
+
 	sc.BollingerBands(sc.BaseDataIn[SC_LAST], RefPrice, 100, 2.0f, MOVAVGTYPE_SIMPLE);
 	HTF_TopBB[sc.Index] = RefPrice.Arrays[0][sc.Index];
 	HTF_BottomBB[sc.Index] = RefPrice.Arrays[1][sc.Index];
@@ -61,16 +104,11 @@ SCSFExport scsf_BBTrader(SCStudyGraphRef sc)
 
 	s_SCPositionData PositionData;
 	sc.GetTradePosition(PositionData);
+	auto& PositionQuantity = PositionData.PositionQuantity;
 
-	if (Time > 46500)
-	{
-		if (PositionData.PositionQuantity != 0)
-			sc.FlattenAndCancelAllOrders();
+	if (PositionQuantity == 0 && !IsValidTradeTime(Time)) return;
 
-		return;
-	}
-
-	if (PositionData.OpenProfitLoss < -5000.0f)
+	if (ShouldStopout(StopInput.GetFloat(), Time, CurrentPrice, PositionData))
 	{
 		sc.FlattenAndCancelAllOrders();
 		return;
@@ -79,9 +117,7 @@ SCSFExport scsf_BBTrader(SCStudyGraphRef sc)
 	s_SCNewOrder NewOrder;
 	NewOrder.OrderQuantity = 1;
 	NewOrder.OrderType = SCT_ORDERTYPE_MARKET;
-	NewOrder.Symbol = sc.Symbol;
-
-	auto& PositionQuantity = PositionData.PositionQuantity;
+	NewOrder.Symbol = sc.TradeAndCurrentQuoteSymbol;
 
 	if (PositionQuantity)
 	{

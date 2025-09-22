@@ -31,7 +31,6 @@ SCSFExport scsf_RSITrendFollow(SCStudyGraphRef sc)
 	auto& LongThresholdInput = sc.Input[1];
 	auto& ShortThresholdInput = sc.Input[2];
 
-
 	if (sc.SetDefaults)
 	{
 		sc.GraphName = "RSI Trend Follow";
