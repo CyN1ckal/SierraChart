@@ -41,6 +41,10 @@ SCSFExport scsf_BBTrader(SCStudyGraphRef sc)
 
 	auto& LiveInput = sc.Input[0];
 	auto& StopInput = sc.Input[1];
+	auto& HTFLength = sc.Input[2];
+	auto& HTFDeviation = sc.Input[3];
+	auto& LTFLength = sc.Input[4];
+	auto& LTFDeviation = sc.Input[5];
 
 	if (sc.SetDefaults)
 	{
@@ -55,6 +59,18 @@ SCSFExport scsf_BBTrader(SCStudyGraphRef sc)
 
 		StopInput.Name = "Stop Amount (P)";
 		StopInput.SetFloat(250.0f);
+
+		HTFLength.Name = "HTF Length";
+		HTFLength.SetInt(100);
+
+		HTFDeviation.Name = "HTF Deviation";
+		HTFDeviation.SetFloat(2.0f);
+
+		LTFLength.Name = "LTF Length";
+		LTFLength.SetInt(21);
+
+		LTFDeviation.Name = "LTF Deviation";
+		LTFDeviation.SetFloat(2.0f);
 
 		HTF_TopBB.Name = "HTF Top BB";
 		HTF_TopBB.DrawStyle = DRAWSTYLE_LINE;
@@ -76,7 +92,7 @@ SCSFExport scsf_BBTrader(SCStudyGraphRef sc)
 		LTF_BottomBB.PrimaryColor = RGB(0, 255, 0);
 		LTF_BottomBB.LineWidth = 1;
 
-		RefPrice.Name = "Ref Price";
+		RefPrice.Name = "Reference Price";
 		RefPrice.DrawStyle = DRAWSTYLE_LINE;
 		RefPrice.PrimaryColor = RGB(255, 255, 255);
 		RefPrice.LineWidth = 1;
@@ -84,11 +100,11 @@ SCSFExport scsf_BBTrader(SCStudyGraphRef sc)
 
 	sc.SendOrdersToTradeService = LiveInput.GetYesNo();
 
-	sc.BollingerBands(sc.BaseDataIn[SC_LAST], RefPrice, 100, 2.0f, MOVAVGTYPE_SIMPLE);
+	sc.BollingerBands(sc.BaseDataIn[SC_LAST], RefPrice, HTFLength.GetInt(), HTFDeviation.GetFloat(), MOVAVGTYPE_SIMPLE);
 	HTF_TopBB[sc.Index] = RefPrice.Arrays[0][sc.Index];
 	HTF_BottomBB[sc.Index] = RefPrice.Arrays[1][sc.Index];
 
-	sc.BollingerBands(sc.BaseDataIn[SC_LAST], LTF_TopBB, 21, 2.0f, MOVAVGTYPE_SIMPLE);
+	sc.BollingerBands(sc.BaseDataIn[SC_LAST], LTF_TopBB, LTFLength.GetInt(), LTFDeviation.GetFloat(), MOVAVGTYPE_SIMPLE);
 	LTF_TopBB[sc.Index] = LTF_TopBB.Arrays[0][sc.Index];
 	LTF_BottomBB[sc.Index] = LTF_TopBB.Arrays[1][sc.Index];
 
