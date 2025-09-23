@@ -11,3 +11,4 @@ SCDLLName("CyNickal Sierra Chart Studies")
 #include "BB Trader/BBTrader.hpp"
 #include "VMABB/VMABB.hpp"
 #include "RSI Trend Follow/RSITrendFollow.hpp"
+#include "VAR/VAR.hpp"

@@ -154,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClInclude Include="VAR\VAR.hpp" />
     <ClInclude Include="VMABB\VMABB.hpp" />
     <ClInclude Include="BB Trader\BBTrader.hpp" />
     <ClCompile Include="pch.cpp">
