@@ -3,8 +3,8 @@
 
 bool IsValidTradeTime(int Time)
 {
-	/* after 12:55 pm */
-	if (Time > 46500) return false;
+	/* after 12:54 pm */
+	if (Time > 46400) return false;
 
 	/* before 6:30 am */
 	if (Time < 23400) return false;
