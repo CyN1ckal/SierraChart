@@ -34,10 +34,6 @@ RiskMetrics GetRiskMetrics(SCStudyGraphRef sc, SCSubgraphRef Change, int Length,
 
 	uint32_t VARIndex = std::round(Intermediate);
 
-	SCString DebugString = std::format("Var Index: {0:d}, Item Width {1:.4f}, Intermediate {2:f}", VARIndex, ItemWidth, Intermediate).c_str();
-
-	sc.AddMessageToLog(DebugString, 1);
-
 	rm.VAR = Changes[VARIndex];
 
 	for(int i = 0; i < VARIndex; i++)
@@ -54,8 +50,10 @@ SCSFExport scsf_RiskMetrics(SCStudyGraphRef sc)
 	auto& VARPercentile = sc.Input[1];
 
 	auto& DailyChange = sc.Subgraph[0];
-	auto& VARSubgraph = sc.Subgraph[1];
-	auto& ESSubgraph = sc.Subgraph[2];
+	auto& VAR_Percent_Subgraph = sc.Subgraph[1];
+	auto& ES_Percent_Subgraph = sc.Subgraph[2];
+	auto& VAR_Dollar_Subgraph = sc.Subgraph[3];
+	auto& ES_Dollar_Subgraph = sc.Subgraph[4];
 
 	if (sc.SetDefaults)
 	{
@@ -63,20 +61,28 @@ SCSFExport scsf_RiskMetrics(SCStudyGraphRef sc)
 
 		sc.AutoLoop = 1;
 
-		VARLength.Name = "Length";
+		VARLength.Name = "Length (Bars)";
 		VARLength.SetInt(252);
 
-		VARPercentile.Name = "Confidence Interval";
+		VARPercentile.Name = "Confidence Interval (%)";
 		VARPercentile.SetFloat(99.0f);
 
-		DailyChange.Name = "Daily Change";
+		DailyChange.Name = "Change %";
 
-		VARSubgraph.Name = "VAR";
+		VAR_Percent_Subgraph.Name = "VAR %";
 
-		ESSubgraph.Name = "ES";
+		ES_Percent_Subgraph.Name = "CVAR %";
+
+		VAR_Dollar_Subgraph.Name = "VAR $";
+		VAR_Dollar_Subgraph.DrawStyle = DRAWSTYLE_IGNORE;
+
+		ES_Dollar_Subgraph.Name = "CVAR $";
+		ES_Dollar_Subgraph.DrawStyle = DRAWSTYLE_IGNORE;
 	}
 
-	DailyChange[sc.Index] = sc.BaseDataIn[SC_LAST][sc.Index] - sc.BaseDataIn[SC_LAST][sc.Index - 1];
+	auto& LastPrice = sc.BaseDataIn[SC_LAST][sc.Index];
+
+	DailyChange[sc.Index] = (LastPrice / sc.BaseDataIn[SC_LAST][sc.Index - 1]) - 1;
 
 	auto Length = VARLength.GetInt();
 	auto Percentile = VARPercentile.GetFloat();
@@ -85,6 +91,9 @@ SCSFExport scsf_RiskMetrics(SCStudyGraphRef sc)
 
 	auto RiskMetrics = GetRiskMetrics(sc, DailyChange, Length, Percentile);
 
-	VARSubgraph[sc.Index] = RiskMetrics.VAR;
-	ESSubgraph[sc.Index] = RiskMetrics.ES;
+	VAR_Percent_Subgraph[sc.Index] = RiskMetrics.VAR;
+	ES_Percent_Subgraph[sc.Index] = RiskMetrics.ES;
+
+	VAR_Dollar_Subgraph[sc.Index] = RiskMetrics.VAR * LastPrice;
+	ES_Dollar_Subgraph[sc.Index] = RiskMetrics.ES * LastPrice;
 }
