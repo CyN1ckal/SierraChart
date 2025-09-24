@@ -7,7 +7,7 @@ struct RiskMetrics
 	float ES = 0.0f;
 };
 
-RiskMetrics GetRiskMetrics(SCStudyGraphRef sc, SCSubgraphRef Change, int Length, float Percentile)
+RiskMetrics GetRiskMetrics(SCStudyGraphRef sc, SCSubgraphRef PercentChanges, int Length, float Percentile)
 {
 	RiskMetrics rm;
 
@@ -17,7 +17,7 @@ RiskMetrics GetRiskMetrics(SCStudyGraphRef sc, SCSubgraphRef Change, int Length,
 	Changes.reserve(Length);
 
 	for (int i = sc.Index; i > sc.Index - Length; i--)
-		Changes.push_back(Change[i]);
+		Changes.push_back(PercentChanges[i]);
 
 	std::sort(Changes.begin(), Changes.end());
 
